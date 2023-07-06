@@ -11,11 +11,11 @@ def control_car(angle):
     if(angle > 0.15):
         keyboard.release('right')
         keyboard.press("left")
-        print("Direita")
+        print("Esquerda")
     elif(angle < -0.15):
         keyboard.release('left')
         keyboard.press("right")
-        print("Esquerda")
+        print("Direita")
     else:
         keyboard.release('right')
         keyboard.release('left')
