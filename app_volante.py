@@ -4,7 +4,7 @@ import vgamepad as vg
 import mediapipe as mp
 
 
-def normalixar_angulo(angulo,a_min,a_max):
+def normalizar_angulo(angulo,a_min,a_max):
     return((abs(angulo)- a_min)/(a_max-a_min))
 
 def calcular_angulo(p1,p2):
@@ -30,13 +30,13 @@ def controlar_volante(angulo):
     if angulo > a_min:
         if angulo > a_max:
             angulo = a_max
-        gamepad.left_joystick_float(-normalixar_angulo(angulo,a_min,a_max),0)
+        gamepad.left_joystick_float(-normalizar_angulo(angulo,a_min,a_max),0)
         print("Esquerda")
 
     elif angulo < -a_min:
         if angulo < - a_max:
             angulo = -a_max
-        gamepad.left_joystick_float(normalixar_angulo(angulo,a_min,a_max),0)
+        gamepad.left_joystick_float(normalizar_angulo(angulo,a_min,a_max),0)
         print("Direita")
     
     else:
