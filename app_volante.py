@@ -26,8 +26,7 @@ def controlar_velocidade(pontos):
         gamepad.left_trigger_float(0)
 
 def controlar_volante(angulo):
-    a_min, a_max = 6, 45
-    
+    a_min, a_max = 1, 30
     if angulo > a_min:
         if angulo > a_max:
             angulo = a_max
@@ -52,33 +51,35 @@ mpHands = mp.solutions.hands
 hands = mpHands.Hands(max_num_hands=2)
 gamepad = vg.VX360Gamepad()
 while True:
-    ret, frame = camera.read()
+    try:
+        ret, frame = camera.read()
 
-    frameRgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-    
-    results = hands.process(frameRgb)
-
-    double_hands = ([],[])
-    if results.multi_hand_landmarks:
-        for index, handsLms in enumerate(results.multi_hand_landmarks):
-            for id, lm in enumerate(handsLms.landmark):
-                h, w, _ = frame.shape
-                cx , cy = int(lm.x*w), int(lm.y*h)
-                double_hands[index].append((cx,cy))
-
-            mpDraw.draw_landmarks(frame,handsLms,mpHands.HAND_CONNECTIONS)  
+        frameRgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         
-        try:
-            angulo = calcular_angulo(double_hands[0][0],double_hands[1][0])
-            controlar_volante(angulo)
-            controlar_velocidade(double_hands)
-            gamepad.update()
-            cv2.line(frame,double_hands[0][0],double_hands[1][0],(255,0,0),3)
-        except:
-            print("Problema")
+        results = hands.process(frameRgb)
+
+        double_hands = ([],[])
+        if results.multi_hand_landmarks:
+            for index, handsLms in enumerate(results.multi_hand_landmarks):
+                for id, lm in enumerate(handsLms.landmark):
+                    h, w, _ = frame.shape
+                    cx , cy = int(lm.x*w), int(lm.y*h)
+                    double_hands[index].append((cx,cy))
+
+                mpDraw.draw_landmarks(frame,handsLms,mpHands.HAND_CONNECTIONS)  
+            
+            try:
+                angulo = calcular_angulo(double_hands[0][0],double_hands[1][0])
+                controlar_volante(angulo)
+                controlar_velocidade(double_hands)
+                gamepad.update()
+                cv2.line(frame,double_hands[0][0],double_hands[1][0],(255,0,0),3)
+            except:
+                print("Problema")
 
 
-    cv2.imshow("Volante virtual",frame)
-
+        cv2.imshow("Volante virtual",frame)
+    except:
+        pass
     if cv2.waitKey(1) & 0xFF == ord("q"):
         break
