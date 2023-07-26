@@ -12,19 +12,40 @@ def calcular_angulo(p1,p2):
     theta = math.atan((p2[0] - p1[0])/(p2[1] - p1[1]))
     return int(theta*180/math.pi)
 
-def pedalar():
-    if rpm >= 40:
+global press
+press = False
+
+def pedalar(mao,ombro):
+    global rpm, press,tick
+    # if rpm > 80 or press:
+    #     gamepad.left_trigger_float(0.0)
+    #     gamepad.press_button(vg.XUSB_BUTTON.XUSB_GAMEPAD_RIGHT_SHOULDER)
+    #     gamepad.press_button(vg.XUSB_BUTTON.XUSB_GAMEPAD_A)
+    #     if not press:
+    #         gamepad.press_button(vg.XUSB_BUTTON.XUSB_GAMEPAD_A)
+    #         press = True
+    #     elif press:
+    #         gamepad.release_button(vg.XUSB_BUTTON.XUSB_GAMEPAD_A)
+    #         press = False
+    #     time.sleep(0.1)
+    if mao[1] < ombro[1]:
+        gamepad.left_trigger_float(0.8)
+        gamepad.release_button(vg.XUSB_BUTTON.XUSB_GAMEPAD_RIGHT_SHOULDER)
+        gamepad.release_button(vg.XUSB_BUTTON.XUSB_GAMEPAD_A)
+        rpm =0
+        tick = 0
+    elif rpm >= 40:
+        gamepad.left_trigger_float(0.0)
         gamepad.release_button(vg.XUSB_BUTTON.XUSB_GAMEPAD_RIGHT_SHOULDER)
         gamepad.press_button(vg.XUSB_BUTTON.XUSB_GAMEPAD_A)
     elif rpm < 40:
+        gamepad.left_trigger_float(0.0)
         gamepad.release_button(vg.XUSB_BUTTON.XUSB_GAMEPAD_RIGHT_SHOULDER)
         gamepad.release_button(vg.XUSB_BUTTON.XUSB_GAMEPAD_A)
-    elif rpm > 80:
-        gamepad.press_button(vg.XUSB_BUTTON.XUSB_GAMEPAD_RIGHT_SHOULDER)
+    
     else:
         gamepad.release_button(vg.XUSB_BUTTON.XUSB_GAMEPAD_RIGHT_SHOULDER)
         gamepad.release_button(vg.XUSB_BUTTON.XUSB_GAMEPAD_A)
-        gamepad.left_trigger_float(0.3)
 
 
 
@@ -32,53 +53,64 @@ def normalizar_angulo(angulo,a_min,a_max):
     return((abs(angulo)- a_min)/(a_max-a_min))
 
 def controlar_bike(angulo):
-    a_min,a_max = 1,35
+    a_min,a_max = 1,30
     if angulo > a_min:
         if angulo > a_max:
             angulo = a_max
-        gamepad.left_joystick_float(normalizar_angulo(angulo,a_min,a_max),0)
-        print("Esquerda")
+        if abs(angulo) > 15:
+            gamepad.left_joystick_float(-0.58   ,0)
+        elif abs(angulo) > 12:
+            gamepad.left_joystick_float(-0.5,0)
+        elif abs(angulo) > 5:
+            gamepad.left_joystick_float(-0.4,0)
+        else:
+            gamepad.left_joystick_float(-0.3,0)
+        
 
     elif angulo < -a_min:
-        if angulo < - a_max:
+        if angulo < -a_max:
             angulo = -a_max
-        gamepad.left_joystick_float(-normalizar_angulo(angulo,a_min,a_max),0)
-        print("Direita")
-    
+        if abs(angulo) > 15:
+            gamepad.left_joystick_float(0.58    ,0)
+        elif abs(angulo) > 12:
+            gamepad.left_joystick_float(0.5,0)
+        elif abs(angulo) > 5:
+            gamepad.left_joystick_float(0.4,0)
+        else:
+            gamepad.left_joystick_float(0.3,0)   
     else:
         gamepad.left_joystick_float(0,0)
-        print("Reto")
 
 
 def ponto_medio(p1,p2):
     return(int((p2[0]+p1[0])/2),int((p2[1]+p1[1])/2))
 
 def calcula_rpm(tf):
-    return(60*2/tf)
+    return(60*4/tf)
 
 
 def controla_rotacao(dist,body):
     global rpm, t1, t2, tick,flag
     try:
         if body:
-            if dist <= 180 and not flag:
+            if dist <= 170 and not flag:
                 tick += 1
                 flag = True
-            if dist > 180 and flag:
+            if dist > 170 and flag:
                 tick += 1 
                 flag = False
 
             
             if tick ==1:
                 t1 = time.time()
-            if tick == 5:
+            if tick == 9:
                 t2 = time.time()
                 flag = False
                 temp = [t1,t2]
                 tf = abs(max(temp)-min(temp))
                 tick = 0
                 rpm = calcula_rpm(tf)  
-
+        
     except:
         pass
 
@@ -100,9 +132,8 @@ t1=t2=time.time()
 while True:
     try:
         ret, frame = camera.read()
-
+        frame =cv2.flip(frame, 1)
         frameRgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-
         results = pose.process(frameRgb)
         body = []
         if results.pose_landmarks:
@@ -118,10 +149,15 @@ while True:
                 p_medio = ponto_medio(body[24],body[23])
                 angulo = calcular_angulo(p_medio,body[0])
                 controlar_bike(angulo)
-                pedalar()
+
+                #mão esquerda
+                mao = body[16]
+                ombro = body[12]
+                pedalar(mao, ombro)
+
                 gamepad.update()
-                cv2.putText(frame,f"dist: {str(dist)}",(45,50),cv2.FONT_HERSHEY_SIMPLEX,1,255,3)
-                cv2.putText(frame,f"rpm: {str(int(rpm))}",(45,100),cv2.FONT_HERSHEY_SIMPLEX,1,255,3)
+                cv2.putText(frame,f"dist: {str(dist)}",(55,50),cv2.FONT_HERSHEY_SIMPLEX,1,255,3)
+                cv2.putText(frame,f"rpm: {str(int(rpm))}",(450,100),cv2.FONT_HERSHEY_SIMPLEX,1,255,3)
                 cv2.putText(frame,f"ang: {str(int(angulo))}",(450,50),cv2.FONT_HERSHEY_SIMPLEX,1,255,3)
                 cv2.line(frame,body[28],body[24],(255,0,0),2)
                 cv2.line(frame,p_medio,body[0],(0,255,0),2)
