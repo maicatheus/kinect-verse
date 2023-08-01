@@ -15,7 +15,7 @@ def controlar_velocidade(pontos):
     hand1,hand2 = pontos
     if(hand1[4][1]<hand1[3][1] and hand2[4][1]<hand2[3][1]):
         gamepad.left_trigger_float(0)
-        gamepad.right_trigger_float(0.86)
+        gamepad.right_trigger_float(0.5)
         print("Acelera!")
     elif(hand1[4][1]<hand1[3][1] and hand2[4][1]>hand2[3][1] or hand1[4][1]>hand1[3][1] and hand2[4][1]<hand2[3][1]):
         gamepad.right_trigger_float(0)
