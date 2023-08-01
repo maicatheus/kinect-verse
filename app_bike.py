@@ -2,7 +2,6 @@ import cv2
 import math
 import vgamepad as vg
 import mediapipe as mp
-import threading
 import time
 
 def distancia_entre_pontos(p1,p2):
@@ -58,7 +57,7 @@ def controlar_bike(angulo):
         if angulo > a_max:
             angulo = a_max
         if abs(angulo) > 15:
-            gamepad.left_joystick_float(-0.58   ,0)
+            gamepad.left_joystick_float(-0.58,0)
         elif abs(angulo) > 12:
             gamepad.left_joystick_float(-0.5,0)
         elif abs(angulo) > 5:
@@ -71,7 +70,7 @@ def controlar_bike(angulo):
         if angulo < -a_max:
             angulo = -a_max
         if abs(angulo) > 15:
-            gamepad.left_joystick_float(0.58    ,0)
+            gamepad.left_joystick_float(0.58,0)
         elif abs(angulo) > 12:
             gamepad.left_joystick_float(0.5,0)
         elif abs(angulo) > 5:
@@ -156,9 +155,9 @@ while True:
                 pedalar(mao, ombro)
 
                 gamepad.update()
-                cv2.putText(frame,f"dist: {str(dist)}",(55,50),cv2.FONT_HERSHEY_SIMPLEX,1,255,3)
-                cv2.putText(frame,f"rpm: {str(int(rpm))}",(450,100),cv2.FONT_HERSHEY_SIMPLEX,1,255,3)
-                cv2.putText(frame,f"ang: {str(int(angulo))}",(450,50),cv2.FONT_HERSHEY_SIMPLEX,1,255,3)
+                cv2.putText(frame,f"dist: {str(dist)}",(150,50),cv2.FONT_HERSHEY_SIMPLEX,1,255,3)
+                cv2.putText(frame,f"rpm: {str(int(rpm))}",(300,100),cv2.FONT_HERSHEY_SIMPLEX,1,255,3)
+                cv2.putText(frame,f"ang: {str(int(angulo))}",(300,50),cv2.FONT_HERSHEY_SIMPLEX,1,255,3)
                 cv2.line(frame,body[28],body[24],(255,0,0),2)
                 cv2.line(frame,p_medio,body[0],(0,255,0),2)
             except:
